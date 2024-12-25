@@ -111,9 +111,40 @@
     .highlighted {
       border: 2px solid #337ab7;
     }
+    .announcement-banner {
+  background: linear-gradient(90deg, #4CAF50, #087F23); /* Smooth gradient */
+  color: #fff;
+  padding: 0.75rem 0;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+}
+
+.announcement-banner .btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.8);
+  color: #fff;
+}
+
+.announcement-banner .btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
   </style>
 </head>
 <body>
+
+    <!-- Announcement Banner -->
+<div class="announcement-banner">
+    <div class="container d-flex align-items-center justify-content-between">
+      <span>🚀 Just Launched: New Features for Custom Categories!</span>
+      <a href="#docs" class="btn btn-outline-light btn-sm">Learn More</a>
+    </div>
+  </div>
+  
 
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
@@ -158,12 +189,19 @@
             Plus, filter your results for exactly the fields you need.
           </p>
           <p class="text-secondary">
-            Enter your <strong>API Key</strong>, the email/URL, and select which fields to return. You can also specify custom categories to override the defaults.
+            Use the form on the right to test the API live. Enter an API key, an email or domain, optional custom categories, and choose the fields you’d like to return. See the response below instantly!
+          </p>
+          <p class="text-secondary">
+            Example inputs are provided to get you started.
           </p>
         </div>
         <div class="col-lg-6">
           <div class="card border-0 mb-3" style="background-color:#1c1c1c;">
             <div class="card-body">
+              <h5 class="text-light">Test the API</h5>
+              <p class="text-secondary">
+                Fill in the fields below to send a live request to the Categorme API. See how it works in real-time!
+              </p>
               <form id="categorizeForm">
                 <!-- API Key -->
                 <div class="mb-3">
@@ -232,6 +270,7 @@
       </div>
     </div>
   </section>
+
   
 
   <!-- About Section -->
