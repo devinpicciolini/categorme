@@ -1,3 +1,4 @@
+import os
 import re
 import json
 import requests
@@ -5,126 +6,73 @@ from bs4 import BeautifulSoup
 import openai
 
 from flask import Flask, request, jsonify, render_template
-
-# Import secrets from config.py
 import config
+import categories  # Import your standard categories from categories.py
 
 app = Flask(__name__)
 
-# Use the values from config.py
-VALID_BEARER_TOKEN = config.BEARER_TOKEN
+VALID_API_KEY = config.API_KEY
 openai.api_key = config.OPENAI_API_KEY
 
-
-def extract_domain(input_string):
-    """
-    Extract domain from an email address or URL.
-    """
+def parse_or_strip(input_string):
     if "@" in input_string:
-        return input_string.split("@")[1]
-    domain_pattern = re.compile(r"https?://(www\.)?(?P<domain>[^/]+)")
-    match = domain_pattern.match(input_string)
-    if match:
-        return match.group("domain")
-    return input_string
-
+        return "email", input_string.split("@")[-1]
+    pattern = re.compile(r"https?://(www\.)?")
+    domain = pattern.sub("", input_string).split("/")[0]
+    return "domain", domain
 
 def fetch_homepage_and_url(domain):
-    """
-    Attempts http first, then https if that fails.
-    Returns the HTML content and the final URL used.
-    """
     for scheme in ["http://", "https://"]:
         final_url = f"{scheme}{domain}"
         try:
-            response = requests.get(final_url, timeout=10)
-            response.raise_for_status()
-            return response.text, final_url
+            resp = requests.get(final_url, timeout=10)
+            resp.raise_for_status()
+            return resp.text, final_url
         except requests.RequestException:
             continue
     raise ValueError(f"Could not fetch homepage for domain: {domain}")
 
-
 def parse_metadata(html_content):
-    """
-    Parse the <title> and meta tags (description, keywords).
-    """
     soup = BeautifulSoup(html_content, "html.parser")
     metadata = {
         "title": soup.title.string if soup.title else "No title found",
         "description": "",
         "keywords": ""
     }
-    description_tag = soup.find("meta", attrs={"name": "description"})
-    if description_tag and "content" in description_tag.attrs:
-        metadata["description"] = description_tag["content"]
+    desc_tag = soup.find("meta", attrs={"name": "description"})
+    if desc_tag and "content" in desc_tag.attrs:
+        metadata["description"] = desc_tag["content"]
     keywords_tag = soup.find("meta", attrs={"name": "keywords"})
     if keywords_tag and "content" in keywords_tag.attrs:
         metadata["keywords"] = keywords_tag["content"]
     return metadata
 
-
 def parse_contacts(html_content):
-    """
-    Extract phone numbers and emails from the page text.
-    """
     soup = BeautifulSoup(html_content, "html.parser")
     text = soup.get_text(separator=" ")
+
     email_pattern = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
     phone_pattern = re.compile(r"\+?\d{0,3}[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}")
 
-    emails = set(email_pattern.findall(text))
-    phones = set(phone_pattern.findall(text))
-
+    emails = list(set(email_pattern.findall(text)))
+    phones = list(set(phone_pattern.findall(text)))
     return {
-        "phone_numbers": list(phones),
-        "emails": list(emails)
+        "phone_numbers": phones,
+        "emails": emails
     }
 
-
-def categorize_business(domain, metadata, homepage_content):
+def categorize_business(domain, metadata, homepage_content, user_categories=None):
     """
-    Uses OpenAI ChatCompletion to categorize the business and produce:
-      - category
-      - summary (two sentences)
+    Use custom categories if provided, or fall back to the default categories.
     """
-    categories = [
-        "Accommodation and Food Services",
-        "Advertising and Marketing",
-        "Agriculture, Forestry, Fishing and Hunting",
-        "Arts, Entertainment, and Recreation",
-        "Automotive",
-        "Construction",
-        "Consulting and Business Services",
-        "Consumer Services",
-        "E-commerce",
-        "Education",
-        "Energy and Utilities",
-        "Finance",
-        "Insurance",
-        "Healthcare",
-        "Hospitality",
-        "Information Technology",
-        "Manufacturing",
-        "Mining and Quarrying",
-        "Non-Profit",
-        "Professional, Scientific, and Technical Services",
-        "Public Administration",
-        "Real Estate",
-        "Retail",
-        "Telecommunications",
-        "Transportation and Warehousing",
-        "Travel",
-        "Wholesale Trade",
-        "Other"
-    ]
+    cats = user_categories if user_categories else categories.CATEGORIES_LIST
 
     prompt = (
         f"Domain: {domain}\n"
         f"Metadata: {metadata}\n"
         f"Homepage Content (truncated to 1000 chars): {homepage_content[:1000]}\n\n"
-        "You must choose exactly one category from this list:\n"
-        f"{', '.join(categories)}\n\n"
+        "You must choose exactly one category from the list below. Use only the categories provided:\n"
+        f"{', '.join(cats)}\n\n"
         "Additionally, provide a two-sentence summary of the business and the product/service it offers.\n"
         "Respond with valid JSON only, and use the format:\n"
         "{\n"
@@ -136,6 +84,9 @@ def categorize_business(domain, metadata, homepage_content):
         "If none of the listed categories fit, respond with \"Other\".\n"
         "Do not include any additional text outside of the JSON.\n"
     )
+
+    # Log the prompt for debugging
+    print("Prompt Sent to OpenAI:", prompt)
 
     messages = [
         {
@@ -159,72 +110,80 @@ def categorize_business(domain, metadata, homepage_content):
     )
     return response.choices[0].message.content.strip()
 
-
-# -------------------------
-#  Flask Routes
-# -------------------------
-
-from flask import render_template
-
 @app.route("/")
 def index():
-    """
-    Serve the test page with a form (including a Bearer token field).
-    """
     return render_template("index.html")
-
-
-from flask import request, jsonify
 
 @app.route("/api/categorize", methods=["POST"])
 def api_categorize():
-    """
-    POST endpoint that expects JSON:
-    {
-      "input_string": "some email or url"
-    }
-    and Bearer token in the Authorization header.
-    """
     try:
-        # 1) Check Bearer token
-        auth_header = request.headers.get("Authorization", "")
-        if not auth_header.startswith("Bearer "):
-            return jsonify({"error": "Missing or invalid Bearer token"}), 401
+        # Check X-API-Key
+        api_key = request.headers.get("X-API-Key", "")
+        if not api_key or api_key != VALID_API_KEY:
+            return jsonify({"error": "Unauthorized or missing X-API-Key"}), 401
 
-        token = auth_header.replace("Bearer ", "").strip()
-        if token != VALID_BEARER_TOKEN:
-            return jsonify({"error": "Unauthorized token"}), 401
+        data = request.get_json() or {}
+        input_str = data.get("input_string", "").strip()
+        fields = data.get("fields", [])
+        user_cats = data.get("categories", [])  # Custom categories
 
-        # 2) Parse the body
-        data = request.get_json()
-        user_input = data.get("input_string", "").strip()
-        if not user_input:
+        if not input_str:
             return jsonify({"error": "No input_string provided"}), 400
 
-        # 3) Perform the main logic
-        domain = extract_domain(user_input)
-        homepage_content, final_url = fetch_homepage_and_url(domain)
-        metadata = parse_metadata(homepage_content)
-        contacts = parse_contacts(homepage_content)
-        openai_json_str = categorize_business(domain, metadata, homepage_content)
+        # Debug: Log input data
+        print("Custom Categories Received:", user_cats)
 
-        # 4) Parse the raw JSON from OpenAI
-        openai_dict = json.loads(openai_json_str)
-        if "business_data" not in openai_dict:
-            openai_dict["business_data"] = {}
+        # Distinguish email or domain
+        input_type, domain_part = parse_or_strip(input_str)
 
-        # 5) Insert phone numbers, emails, site info
-        openai_dict["business_data"]["phone_numbers"] = contacts["phone_numbers"]
-        openai_dict["business_data"]["emails"] = contacts["emails"]
-        openai_dict["business_data"]["website_title"] = metadata["title"]
-        openai_dict["business_data"]["website_description"] = metadata["description"]
-        openai_dict["business_data"]["url"] = final_url
+        homepage_content, final_url = "", ""
+        try:
+            homepage_content, final_url = fetch_homepage_and_url(domain_part)
+        except ValueError:
+            pass
 
-        return jsonify(openai_dict), 200
+        metadata = {}
+        contacts = {"phone_numbers": [], "emails": []}
+        category = "Unknown"
+        summary = ""
+
+        if homepage_content:
+            metadata = parse_metadata(homepage_content)
+            contacts = parse_contacts(homepage_content)
+
+            openai_raw = categorize_business(domain_part, metadata, homepage_content, user_cats)
+            try:
+                openai_dict = json.loads(openai_raw)
+                bd = openai_dict.get("business_data", {})
+                category = bd.get("category", "Unknown")
+                summary = bd.get("summary", "")
+            except json.JSONDecodeError:
+                return jsonify({"error": "OpenAI returned invalid JSON", "raw": openai_raw}), 500
+
+        # Final response
+        result = {
+            "type": input_type,
+            "url": final_url,
+            "phone_numbers": contacts["phone_numbers"],
+            "emails": contacts["emails"],
+            "website_title": metadata.get("title", ""),
+            "website_description": metadata.get("description", ""),
+            "category": category,
+            "summary": summary
+        }
+
+        # Fields filtering
+        if not fields:
+            return jsonify(result), 200
+        else:
+            filtered = {}
+            for f in fields:
+                if f in result:
+                    filtered[f] = result[f]
+            return jsonify(filtered), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Business Categorizer API</title>
+  <title>Categorme API</title>
   <!-- Bootstrap 5 (via CDN) -->
   <link
     rel="stylesheet"
@@ -16,16 +16,14 @@
       margin: 0;
       padding: 0;
     }
-    /* Sticky navbar (dark style) */
     .navbar-dark.bg-dark {
       position: sticky;
       top: 0;
-      z-index: 999; /* ensure it stays above other elements */
+      z-index: 999;
     }
     .navbar-dark .navbar-brand {
       font-weight: 600;
     }
-    /* Hero section with subtle gradient */
     .hero-section {
       padding: 4rem 0;
       background: linear-gradient(
@@ -41,7 +39,6 @@
     .form-label {
       font-weight: 600;
     }
-    /* Code box for JSON output */
     .code-box {
       background: #1c1c1c;
       border: 1px solid #2a2a2a;
@@ -52,7 +49,6 @@
       min-height: 120px;
       color: #eee;
     }
-    /* Footer styles (dark theme with columns) */
     footer {
       background-color: #0b0b0b;
       padding: 3rem 0;
@@ -79,7 +75,6 @@
       font-size: 0.875rem;
       color: #777;
     }
-    /* Pricing Cards */
     .pricing-section {
       background: linear-gradient(
         135deg,
@@ -120,10 +115,10 @@
 </head>
 <body>
 
-  <!-- Sticky Navbar (dark) -->
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
     <div class="container">
-      <a class="navbar-brand" href="#">BizCategorizer</a>
+      <a class="navbar-brand" href="#">Categorme</a>
       <button
         class="navbar-toggler"
         type="button"
@@ -138,24 +133,13 @@
         class="collapse navbar-collapse"
         id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <!-- Example nav links -->
+          <li class="nav-item"><a class="nav-link active" href="#hero">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">About API</a></li>
+          <li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
+          <li class="nav-item"><a class="nav-link" href="#docs">Docs</a></li>
           <li class="nav-item">
-            <a class="nav-link active" href="#hero">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#about">About API</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#pricing">Pricing</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#docs">Docs</a>
-          </li>
-          <li class="nav-item">
-            <!-- Link to the separate sign-up/login page -->
             <a class="nav-link" href="signup_login.html">Log In</a>
           </li>
-          <!-- Sign Up button (call to action) -->
           <li class="nav-item">
             <button class="btn btn-outline-light ms-2">Sign Up</button>
           </li>
@@ -163,98 +147,104 @@
       </div>
     </div>
   </nav>
-
-  <!-- Hero Section -->
-  <section id="hero" class="hero-section">
+<!-- Hero -->
+<section id="hero" class="hero-section">
     <div class="container">
       <div class="row align-items-center gy-5">
-        <!-- Left column: Headline and explanation -->
         <div class="col-lg-6">
-          <h1 class="display-5">
-            Business Categorizer API
-          </h1>
+          <h1 class="display-5">Categorme API</h1>
           <p class="lead text-light">
-            Quickly identify and categorize businesses by simply providing an
-            email or a domain. Our AI-driven categorizer also summarizes the
-            product or service, giving you immediate insights.
+            Quickly identify and categorize businesses by providing an email or a domain.
+            Plus, filter your results for exactly the fields you need.
           </p>
           <p class="text-secondary">
-            Enter your <strong>Bearer Token</strong> and the <strong>email/URL</strong>
-            you wish to categorize below, then click <strong>“Categorize”</strong>
-            to see the results in real-time.
+            Enter your <strong>API Key</strong>, the email/URL, and select which fields to return. You can also specify custom categories to override the defaults.
           </p>
         </div>
-
-        <!-- Right column: Form & result -->
         <div class="col-lg-6">
-          <div class="card border-0 mb-3" style="background-color: #1c1c1c;">
+          <div class="card border-0 mb-3" style="background-color:#1c1c1c;">
             <div class="card-body">
               <form id="categorizeForm">
-                <!-- Bearer Token Input -->
+                <!-- API Key -->
                 <div class="mb-3">
-                  <label for="tokenInput" class="form-label text-light">
-                    Bearer Token:
-                  </label>
+                  <label class="form-label text-light">API Key:</label>
                   <div class="input-group">
-                    <input
-                      type="text"
-                      id="tokenInput"
-                      class="form-control"
-                      placeholder="Bearer from config"
-                    />
-                    <!-- Autofill Button -->
-                    <button
-                      type="button"
-                      class="btn btn-outline-secondary"
-                      id="useExampleToken">
-                      Use Example Token
+                    <input type="text" id="tokenInput" class="form-control" placeholder="API Key" />
+                    <button type="button" class="btn btn-outline-secondary" id="useExampleToken">
+                      Use Example Key
                     </button>
                   </div>
                 </div>
-
-                <!-- Email or URL Input -->
+                <!-- Email or URL -->
                 <div class="mb-3">
-                  <label for="inputString" class="form-label text-light">
-                    Enter an email or URL:
-                  </label>
-                  <input
-                    type="text"
-                    id="inputString"
-                    class="form-control"
-                    placeholder="devin@trykeep.com"
-                  />
+                  <label class="form-label text-light">Email or URL:</label>
+                  <input type="text" id="inputString" class="form-control" placeholder="e.g. devin@trykeep.com or trykeep.com" />
                 </div>
-
+                <!-- Custom Categories -->
+                <div class="mb-3">
+                  <label class="form-label text-light">Custom Categories (comma-separated):</label>
+                  <input type="text" id="customCategories" class="form-control" placeholder="e.g. Finance, Retail, Education" />
+                </div>
+                <!-- Fields to Return -->
+                <div class="mb-3">
+                  <label class="form-label text-light">Select Fields to Return:</label><br />
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="fieldType" value="type" />
+                    <label class="form-check-label text-light" for="fieldType">Type</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="fieldCategory" value="category" />
+                    <label class="form-check-label text-light" for="fieldCategory">Category</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="fieldSummary" value="summary" />
+                    <label class="form-check-label text-light" for="fieldSummary">Summary</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="fieldPhone" value="phone_numbers" />
+                    <label class="form-check-label text-light" for="fieldPhone">Phone Numbers</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="fieldEmails" value="emails" />
+                    <label class="form-check-label text-light" for="fieldEmails">Emails</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="fieldTitle" value="website_title" />
+                    <label class="form-check-label text-light" for="fieldTitle">Website Title</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="fieldDesc" value="website_description" />
+                    <label class="form-check-label text-light" for="fieldDesc">Website Description</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="fieldUrl" value="url" />
+                    <label class="form-check-label text-light" for="fieldUrl">URL</label>
+                  </div>
+                </div>
                 <button type="submit" class="btn btn-primary w-100 mt-2">
                   Categorize
                 </button>
               </form>
             </div>
           </div>
-
-          <!-- Code box for JSON response, right below the form -->
-          <div class="code-box" id="result">
-            <!-- JSON output appears here -->
-          </div>
+          <div class="code-box" id="result"></div>
         </div>
       </div>
     </div>
   </section>
+  
 
   <!-- About Section -->
   <section id="about" class="py-5">
     <div class="container">
       <h2 class="text-white">About This API</h2>
       <p class="text-secondary">
-        The Business Categorizer API uses powerful natural language processing to
-        identify, classify, and summarize businesses based on their digital presence.
-        It can parse homepage data, retrieve phone numbers and emails, and provide an
-        at-a-glance understanding of what a company offers.
+        The Categorme API uses OpenAI to classify and summarize any business based
+        on its domain. Even if you supply an email, we'll attempt to parse out the
+        domain portion and fetch the homepage for richer data.
       </p>
       <p class="text-secondary">
-        Built with <strong>Flask</strong> and integrated with
-        <strong>OpenAI's GPT-based services</strong>, it demonstrates how easy
-        it is to wrap powerful AI functionality in a secure, scalable API.
+        If no homepage is found, certain fields (like phone_numbers or summary) may be empty.
       </p>
     </div>
   </section>
@@ -264,73 +254,65 @@
     <div class="container">
       <div class="text-center mb-5">
         <h2 class="text-white">Pricing</h2>
-        <p class="text-secondary">
-          Use the core product for free, forever.
-        </p>
+        <p class="text-secondary">Flexible plans for any business size.</p>
       </div>
-
       <div class="row g-4">
-        <!-- Free Plan -->
+        <!-- Starter Plan -->
         <div class="col-md-4">
           <div class="pricing-card h-100 d-flex flex-column justify-content-between">
             <div>
-              <h4 class="text-white">Raycast</h4>
-              <p class="text-secondary">Free, forever.</p>
+              <h4 class="text-white">Starter</h4>
+              <p class="text-secondary">Perfect for small projects</p>
               <div class="price">$0 <span style="font-size: 1rem; font-weight:400;">/month</span></div>
               <ul class="pricing-details list-unstyled mt-4">
-                <li>Core features, including:</li>
-                <li>Clipboard History, Quicklinks, Calculator</li>
-                <li>Snippets, Emoji Picker</li>
-                <li>Window Management</li>
-                <li>Thousands of extensions</li>
+                <li>50 requests / day</li>
+                <li>Basic categorization</li>
+                <li>Phone/Email extraction</li>
+                <li>Community support</li>
               </ul>
             </div>
             <button class="btn btn-outline-light mt-3">
-              Download
+              Get Starter
             </button>
           </div>
         </div>
-
-        <!-- Pro Plan (highlighted) -->
+        <!-- Pro Plan -->
         <div class="col-md-4">
           <div class="pricing-card h-100 highlighted d-flex flex-column justify-content-between">
             <div>
-              <h4 class="text-white">Raycast Pro</h4>
-              <p class="text-secondary">AI at your fingertips</p>
-              <div class="price">$8 <span style="font-size: 1rem; font-weight:400;">/month</span></div>
-              <p class="text-secondary">($96 billed annually)</p>
+              <h4 class="text-white">Pro</h4>
+              <p class="text-secondary">Advanced usage & summarization</p>
+              <div class="price">$29 <span style="font-size: 1rem; font-weight:400;">/month</span></div>
+              <p class="text-secondary">Billed monthly</p>
               <ul class="pricing-details list-unstyled mt-4">
-                <li>Raycast AI</li>
-                <li>Cloud Sync, Custom Themes</li>
-                <li>Unlimited Clipboard History</li>
-                <li>Translator</li>
-                <li>Unlimited Raycast Notes</li>
+                <li>Unlimited requests</li>
+                <li>Priority summarization</li>
+                <li>Enhanced extraction</li>
+                <li>Priority support</li>
               </ul>
             </div>
             <button class="btn btn-primary mt-3">
-              Start Free Trial
+              Upgrade to Pro
             </button>
           </div>
         </div>
-
-        <!-- Team Pro Plan -->
+        <!-- Enterprise Plan -->
         <div class="col-md-4">
           <div class="pricing-card h-100 d-flex flex-column justify-content-between">
             <div>
-              <h4 class="text-white">Team Pro</h4>
-              <p class="text-secondary">AI for your whole team</p>
-              <div class="price">$12 <span style="font-size: 1rem; font-weight:400;">/month/user</span></div>
-              <p class="text-secondary">($144 billed annually)</p>
+              <h4 class="text-white">Enterprise</h4>
+              <p class="text-secondary">Custom solutions for large teams</p>
+              <div class="price">Custom</div>
+              <p class="text-secondary">(Contact us for a quote)</p>
               <ul class="pricing-details list-unstyled mt-4">
-                <li>Everything in Pro</li>
-                <li>Unlimited Shared Commands</li>
-                <li>Unlimited Shared Snippets</li>
-                <li>Unlimited Shared Quicklinks</li>
-                <li>Unlimited Team Members</li>
+                <li>All Pro features</li>
+                <li>Dedicated support rep</li>
+                <li>On-prem or private cloud</li>
+                <li>Custom SLA</li>
               </ul>
             </div>
             <button class="btn btn-outline-light mt-3">
-              Select Plan
+              Contact Sales
             </button>
           </div>
         </div>
@@ -338,49 +320,133 @@
     </div>
   </section>
 
-  <!-- Docs Section with Instructions & Example Usage -->
-  <section id="docs" class="py-5 border-top border-secondary">
+ <!-- Docs -->
+<section id="docs" class="py-5 border-top border-secondary">
     <div class="container">
-      <h2 class="text-white">Docs</h2>
+      <h2 class="text-white">API Documentation</h2>
       <p class="text-secondary">
-        Below is an example of how to use the API. You’ll need your
-        <strong>Bearer Token</strong> to authenticate. Then simply send a POST
-        request to the following URL:
+        The Categorme API allows you to categorize businesses, extract contact information, and retrieve metadata based on an email or domain. Follow the steps below to authenticate, send requests, and customize your responses.
+      </p>
+  
+      <h4 class="text-white mt-4">1. Authorization</h4>
+      <p class="text-secondary">
+        To use the API, you must include your unique API Key in the request headers. The API Key is required for every request and ensures secure access.
       </p>
       <pre class="code-box text-light">
-POST https://api.bizcategorizer.com/api/categorize
-Headers:
-  Content-Type: application/json
-  Authorization: Bearer &lt;YOUR_TOKEN&gt;
-
-Body:
-{
-  "input_string": "devin@trykeep.com"
-}
-
-Response:
-{
-  "business_data": {
-    "category": "Finance",
-    "summary": "...",
-    "phone_numbers": [...],
-    "emails": [...],
-    "website_title": "...",
-    "website_description": "...",
-    "url": "https://..."
-  }
-}
+  Headers:
+    Content-Type: application/json
+    X-API-Key: <YOUR_API_KEY>
       </pre>
       <p class="text-secondary">
-        If you’re using a local Flask server, replace
-        <code>https://api.bizcategorizer.com</code> with
-        <code>http://localhost:5000</code> or whatever domain you have set up
-        for your development environment.
+        Replace <code>&lt;YOUR_API_KEY&gt;</code> with your actual API Key, which you can obtain after registering for the service.
+      </p>
+  
+      <h4 class="text-white mt-4">2. Making a Request</h4>
+      <p class="text-secondary">
+        To categorize a business, send a <strong>POST</strong> request to the following endpoint:
+      </p>
+      <pre class="code-box text-light">
+  POST https://api.categorme.com/api/categorize
+      </pre>
+      <p class="text-secondary">
+        Include the following fields in the JSON body of your request:
+      </p>
+      <ul class="text-secondary">
+        <li><strong>input_string</strong> (required): An email or domain/URL to be categorized (e.g., <code>"devin@trykeep.com"</code> or <code>"trykeep.com"</code>).</li>
+        <li><strong>fields</strong> (optional): A list of specific fields to include in the response. If omitted, all fields are returned.</li>
+        <li><strong>custom_categories</strong> (optional): An array of categories to override the default category list.</li>
+      </ul>
+  
+      <h4 class="text-white mt-4">3. Request Example</h4>
+      <pre class="code-box text-light">
+  Headers:
+    Content-Type: application/json
+    X-API-Key: <YOUR_API_KEY>
+  
+  Body:
+  {
+    "input_string": "devin@trykeep.com",
+    "fields": ["type", "category", "summary"],
+    "custom_categories": ["Finance", "Retail", "E-commerce"]
+  }
+      </pre>
+  
+      <h4 class="text-white mt-4">4. Response Structure</h4>
+      <p class="text-secondary">
+        The API returns a JSON object containing the requested data. Below is an example response:
+      </p>
+      <pre class="code-box text-light">
+  {
+    "type": "email",
+    "url": "https://trykeep.com",
+    "phone_numbers": ["+1-800-555-1234"],
+    "emails": ["info@trykeep.com"],
+    "website_title": "Keep Business Solutions",
+    "website_description": "Helping businesses grow with smart financial tools.",
+    "category": "Finance",
+    "summary": "Keep offers financial tools for small businesses to manage their expenses and credit efficiently."
+  }
+      </pre>
+  
+      <h4 class="text-white mt-4">5. Response Fields</h4>
+      <p class="text-secondary">
+        Below are the fields that may appear in the response, depending on the <code>fields</code> parameter:
+      </p>
+      <ul class="text-secondary">
+        <li><strong>type</strong>: Indicates if the input was an email or domain.</li>
+        <li><strong>url</strong>: The canonical URL for the domain.</li>
+        <li><strong>phone_numbers</strong>: An array of phone numbers found on the homepage.</li>
+        <li><strong>emails</strong>: An array of email addresses found on the homepage.</li>
+        <li><strong>website_title</strong>: The title of the website (from the HTML <code>&lt;title&gt;</code> tag).</li>
+        <li><strong>website_description</strong>: A description of the website (from the meta description tag).</li>
+        <li><strong>category</strong>: The selected category for the business.</li>
+        <li><strong>summary</strong>: A two-sentence summary describing the business and its offerings.</li>
+      </ul>
+  
+      <h4 class="text-white mt-4">6. Filters</h4>
+      <p class="text-secondary">
+        Use the <code>fields</code> parameter to filter the response and include only specific fields. For example:
+      </p>
+      <pre class="code-box text-light">
+  "fields": ["category", "summary", "phone_numbers"]
+      </pre>
+      <p class="text-secondary">
+        This will return only the category, summary, and phone numbers in the response.
+      </p>
+  
+      <h4 class="text-white mt-4">7. Custom Categories</h4>
+      <p class="text-secondary">
+        To use your own categories instead of the default list, include them in the <code>custom_categories</code> parameter. If omitted, the API uses a standard set of categories.
+      </p>
+      <pre class="code-box text-light">
+  "custom_categories": ["Healthcare", "Technology", "Education"]
+      </pre>
+      <p class="text-secondary">
+        The API will select the best-matching category from the provided list.
+      </p>
+  
+      <h4 class="text-white mt-4">8. Error Handling</h4>
+      <p class="text-secondary">
+        If an error occurs, the API returns a JSON object with an <code>error</code> field and an appropriate message.
+      </p>
+      <pre class="code-box text-light">
+  Response Example:
+  {
+    "error": "Unauthorized or missing X-API-Key"
+  }
+      </pre>
+      <p class="text-secondary">
+        Common errors include invalid API keys, missing required fields, or network issues.
+      </p>
+  
+      <p class="text-secondary mt-4">
+        For more help, contact support or refer to the detailed <a href="#about" class="text-light">About API</a> section.
       </p>
     </div>
   </section>
+  
 
-  <!-- Footer (dark) -->
+  <!-- Footer -->
   <footer class="mt-5">
     <div class="container">
       <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">
@@ -397,10 +463,10 @@ Response:
         <div class="col">
           <h5>Core Features</h5>
           <ul>
-            <li><a href="#">Clipboard History</a></li>
-            <li><a href="#">Snippets</a></li>
-            <li><a href="#">Window Management</a></li>
-            <li><a href="#">Quicklinks</a></li>
+            <li><a href="#">Categorization</a></li>
+            <li><a href="#">Summarization</a></li>
+            <li><a href="#">Phone/Email Extraction</a></li>
+            <li><a href="#">SLA & Support</a></li>
           </ul>
         </div>
         <div class="col">
@@ -434,7 +500,7 @@ Response:
       <div class="footer-bottom mt-4">
         <div class="row">
           <div class="col-md-6">
-            <span>© 2023 BizCategorizer. All rights reserved.</span>
+            <span>© 2023 Categorme. All rights reserved.</span>
           </div>
           <div class="col-md-6 text-md-end mt-2 mt-md-0">
             <a href="#" class="me-3">Subscribe to Newsletter</a>
@@ -445,45 +511,61 @@ Response:
     </div>
   </footer>
 
-  <!-- Bootstrap JS (for nav toggler, etc.) -->
+  <!-- Bootstrap JS -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
   </script>
-
-  <!-- JavaScript for handling form submission -->
-  <script>
-    // Example bearer token from config
+<!-- JS for handling form submission -->
+<script>
+    // Example "API Key" from config
     const exampleBearerToken = "Ed3AOgogcjybeHYEf8";
-
+  
     const form = document.getElementById('categorizeForm');
     const resultBox = document.getElementById('result');
     const useExampleTokenBtn = document.getElementById('useExampleToken');
-
-    // Button to autofill the Bearer token input
+  
     useExampleTokenBtn.addEventListener('click', () => {
       document.getElementById('tokenInput').value = exampleBearerToken;
     });
-
-    // Submitting the form
+  
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
+  
+      // Gather the chosen fields from checkboxes
+      const checkboxes = document.querySelectorAll('#categorizeForm input[type="checkbox"]');
+      const selectedFields = [];
+      checkboxes.forEach((cb) => {
+        if (cb.checked) {
+          selectedFields.push(cb.value);
+        }
+      });
+  
+      // Get the custom categories from the input field
+      const customCategories = document
+        .getElementById('customCategories')
+        .value.split(',')
+        .map((cat) => cat.trim())
+        .filter((cat) => cat !== ''); // Remove empty entries
+  
       const tokenVal = document.getElementById('tokenInput').value.trim();
       const inputVal = document.getElementById('inputString').value.trim();
-
-      // Show loading state
+  
       resultBox.textContent = "Loading...";
-
+  
       try {
         const response = await fetch('/api/categorize', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tokenVal}`
+            'X-API-Key': tokenVal
           },
-          body: JSON.stringify({ input_string: inputVal })
+          body: JSON.stringify({
+            input_string: inputVal,
+            fields: selectedFields,
+            custom_categories: customCategories // Include custom categories in the payload
+          })
         });
-
+  
         const data = await response.json();
         resultBox.textContent = JSON.stringify(data, null, 2);
       } catch (err) {
@@ -491,5 +573,6 @@ Response:
       }
     });
   </script>
+  
 </body>
 </html>
