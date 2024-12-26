@@ -4,6 +4,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 import openai
+import whois  # Library for WHOIS lookups
 
 from flask import Flask, request, jsonify, render_template
 import config
@@ -108,6 +109,22 @@ def parse_links(html_content):
         "review_links": review_links
     }
 
+def fetch_whois_data(domain):
+    """
+    Fetch WHOIS information for a given domain.
+    """
+    try:
+        domain_info = whois.whois(domain)
+        return {
+            "creation_date": str(domain_info.creation_date),
+            "last_updated": str(domain_info.updated_date),
+            "expiration_date": str(domain_info.expiration_date),
+            "registrar": domain_info.registrar,
+            "name_servers": domain_info.name_servers,
+        }
+    except Exception as e:
+        return {"error": f"WHOIS lookup failed: {str(e)}"}
+
 def categorize_business(domain, metadata, homepage_content, user_categories=None):
     """
     Use custom categories if provided, or fall back to the default categories.
@@ -194,6 +211,7 @@ def api_categorize():
         metadata = {}
         contacts = {"phone_numbers": [], "emails": []}
         links = {"social_media_links": [], "review_links": []}
+        whois_data = {}
         category = "Unknown"
         summary = ""
         confidence_score = None
@@ -202,6 +220,7 @@ def api_categorize():
             metadata = parse_metadata(homepage_content)
             contacts = parse_contacts(homepage_content)
             links = parse_links(homepage_content)
+            whois_data = fetch_whois_data(domain_part)
 
             openai_raw = categorize_business(domain_part, metadata, homepage_content, user_cats)
             try:
@@ -225,7 +244,8 @@ def api_categorize():
             "website_description": metadata.get("description", ""),
             "category": category,
             "summary": summary,
-            "category_confidence_score": confidence_score
+            "category_confidence_score": confidence_score,
+            "whois_data": whois_data  # Include WHOIS data
         }
 
         # Fields filtering
