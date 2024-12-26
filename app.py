@@ -61,6 +61,53 @@ def parse_contacts(html_content):
         "emails": emails
     }
 
+def parse_links(html_content):
+    """
+    Extract social media and review links from the website content.
+    """
+    soup = BeautifulSoup(html_content, "html.parser")
+    social_media_links = []
+    review_links = []
+
+    # Define patterns for social media platforms
+    social_patterns = {
+        "Facebook": r"facebook\.com",
+        "Twitter": r"twitter\.com",
+        "LinkedIn": r"linkedin\.com",
+        "Instagram": r"instagram\.com",
+        "YouTube": r"youtube\.com",
+        "Pinterest": r"pinterest\.com"
+    }
+
+    # Define patterns for common review platforms
+    review_patterns = {
+        "Google Reviews": r"google\.com/maps",
+        "Yelp": r"yelp\.com",
+        "Trustpilot": r"trustpilot\.com",
+        "BBB": r"bbb\.org"  # Better Business Bureau
+    }
+
+    # Find all links in the HTML
+    for link in soup.find_all("a", href=True):
+        url = link["href"]
+
+        # Check for social media links
+        for platform, pattern in social_patterns.items():
+            if re.search(pattern, url):
+                social_media_links.append({"platform": platform, "url": url})
+                break
+
+        # Check for review links
+        for platform, pattern in review_patterns.items():
+            if re.search(pattern, url):
+                review_links.append({"platform": platform, "url": url})
+                break
+
+    return {
+        "social_media_links": social_media_links,
+        "review_links": review_links
+    }
+
 def categorize_business(domain, metadata, homepage_content, user_categories=None):
     """
     Use custom categories if provided, or fall back to the default categories.
@@ -146,6 +193,7 @@ def api_categorize():
 
         metadata = {}
         contacts = {"phone_numbers": [], "emails": []}
+        links = {"social_media_links": [], "review_links": []}
         category = "Unknown"
         summary = ""
         confidence_score = None
@@ -153,6 +201,7 @@ def api_categorize():
         if homepage_content:
             metadata = parse_metadata(homepage_content)
             contacts = parse_contacts(homepage_content)
+            links = parse_links(homepage_content)
 
             openai_raw = categorize_business(domain_part, metadata, homepage_content, user_cats)
             try:
@@ -170,6 +219,8 @@ def api_categorize():
             "url": final_url,
             "phone_numbers": contacts["phone_numbers"],
             "emails": contacts["emails"],
+            "social_media_links": links["social_media_links"],
+            "review_links": links["review_links"],
             "website_title": metadata.get("title", ""),
             "website_description": metadata.get("description", ""),
             "category": category,
