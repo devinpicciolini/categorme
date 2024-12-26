@@ -249,41 +249,46 @@
                   <label class="form-label text-light">Custom Categories (comma-separated):</label>
                   <input type="text" id="customCategories" class="form-control" placeholder="e.g. Finance, Retail, Education" />
                 </div>
-                <!-- Fields to Return -->
-                <div class="mb-3">
-                  <label class="form-label text-light">Select Fields to Return:</label><br />
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="fieldType" value="type" />
-                    <label class="form-check-label text-light" for="fieldType">Type</label>
-                  </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="fieldCategory" value="category" />
-                    <label class="form-check-label text-light" for="fieldCategory">Category</label>
-                  </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="fieldSummary" value="summary" />
-                    <label class="form-check-label text-light" for="fieldSummary">Summary</label>
-                  </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="fieldPhone" value="phone_numbers" />
-                    <label class="form-check-label text-light" for="fieldPhone">Phone Numbers</label>
-                  </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="fieldEmails" value="emails" />
-                    <label class="form-check-label text-light" for="fieldEmails">Emails</label>
-                  </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="fieldTitle" value="website_title" />
-                    <label class="form-check-label text-light" for="fieldTitle">Website Title</label>
-                  </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="fieldDesc" value="website_description" />
-                    <label class="form-check-label text-light" for="fieldDesc">Website Description</label>
-                  </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="fieldUrl" value="url" />
-                    <label class="form-check-label text-light" for="fieldUrl">URL</label>
-                  </div>
+              <!-- Fields to Return -->
+<div class="mb-3">
+    <label class="form-label text-light">Select Fields to Return:</label><br />
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="fieldType" value="type" />
+      <label class="form-check-label text-light" for="fieldType">Type</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="fieldCategory" value="category" />
+      <label class="form-check-label text-light" for="fieldCategory">Category</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="fieldSummary" value="summary" />
+      <label class="form-check-label text-light" for="fieldSummary">Summary</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="fieldConfidence" value="category_confidence_score" />
+      <label class="form-check-label text-light" for="fieldConfidence">Category Confidence Score</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="fieldPhone" value="phone_numbers" />
+      <label class="form-check-label text-light" for="fieldPhone">Phone Numbers</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="fieldEmails" value="emails" />
+      <label class="form-check-label text-light" for="fieldEmails">Emails</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="fieldTitle" value="website_title" />
+      <label class="form-check-label text-light" for="fieldTitle">Website Title</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="fieldDesc" value="website_description" />
+      <label class="form-check-label text-light" for="fieldDesc">Website Description</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="fieldUrl" value="url" />
+      <label class="form-check-label text-light" for="fieldUrl">URL</label>
+    </div>
+  
                 </div>
                 <button type="submit" class="btn btn-primary w-100 mt-2">
                   Categorize
@@ -636,54 +641,65 @@
     const useExampleTokenBtn = document.getElementById('useExampleToken');
   
     useExampleTokenBtn.addEventListener('click', () => {
-      document.getElementById('tokenInput').value = exampleBearerToken;
+        document.getElementById('tokenInput').value = exampleBearerToken;
     });
   
     form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+        e.preventDefault();
   
-      // Gather the chosen fields from checkboxes
-      const checkboxes = document.querySelectorAll('#categorizeForm input[type="checkbox"]');
-      const selectedFields = [];
-      checkboxes.forEach((cb) => {
-        if (cb.checked) {
-          selectedFields.push(cb.value);
-        }
-      });
-  
-      // Get the custom categories from the input field
-      const customCategories = document
-        .getElementById('customCategories')
-        .value.split(',')
-        .map((cat) => cat.trim())
-        .filter((cat) => cat !== ''); // Remove empty entries
-  
-      const tokenVal = document.getElementById('tokenInput').value.trim();
-      const inputVal = document.getElementById('inputString').value.trim();
-  
-      resultBox.textContent = "Loading...";
-  
-      try {
-        const response = await fetch('/api/categorize', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-API-Key': tokenVal
-          },
-          body: JSON.stringify({
-            input_string: inputVal,
-            fields: selectedFields,
-            custom_categories: customCategories // Include custom categories in the payload
-          })
+        // Gather the chosen fields from checkboxes
+        const checkboxes = document.querySelectorAll('#categorizeForm input[type="checkbox"]');
+        const selectedFields = [];
+        checkboxes.forEach((cb) => {
+            if (cb.checked) {
+                selectedFields.push(cb.value);
+            }
         });
   
-        const data = await response.json();
-        resultBox.textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        resultBox.textContent = `Error: ${err.message}`;
-      }
+        // Get the custom categories from the input field
+        const customCategories = document
+            .getElementById('customCategories')
+            .value.split(',')
+            .map((cat) => cat.trim())
+            .filter((cat) => cat !== ''); // Remove empty entries
+  
+        const tokenVal = document.getElementById('tokenInput').value.trim();
+        const inputVal = document.getElementById('inputString').value.trim();
+  
+        if (!tokenVal || !inputVal) {
+            resultBox.textContent = "Please provide an API Key and input value.";
+            return;
+        }
+  
+        resultBox.textContent = "Loading...";
+  
+        try {
+            const response = await fetch('/api/categorize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': tokenVal
+                },
+                body: JSON.stringify({
+                    input_string: inputVal,
+                    fields: selectedFields,
+                    custom_categories: customCategories // Include custom categories in the payload
+                })
+            });
+  
+            const data = await response.json();
+  
+            if (response.ok) {
+                resultBox.textContent = JSON.stringify(data, null, 2);
+            } else {
+                resultBox.textContent = `Error: ${data.error}`;
+            }
+        } catch (err) {
+            resultBox.textContent = `Error: ${err.message}`;
+        }
     });
-  </script>
+</script>
+
   
 </body>
 </html>

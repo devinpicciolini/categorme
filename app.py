@@ -74,11 +74,13 @@ def categorize_business(domain, metadata, homepage_content, user_categories=None
         "You must choose exactly one category from the list below. Use only the categories provided:\n"
         f"{', '.join(cats)}\n\n"
         "Additionally, provide a two-sentence summary of the business and the product/service it offers.\n"
+        "Assign a confidence score (from 0.0 to 1.0) indicating how certain you are about the selected category.\n"
         "Respond with valid JSON only, and use the format:\n"
         "{\n"
         "  \"business_data\": {\n"
         "    \"category\": \"ChosenCategory\",\n"
-        "    \"summary\": \"Two-sentence summary here.\"\n"
+        "    \"summary\": \"Two-sentence summary here.\",\n"
+        "    \"category_confidence_score\": 0.85\n"
         "  }\n"
         "}\n"
         "If none of the listed categories fit, respond with \"Other\".\n"
@@ -146,6 +148,7 @@ def api_categorize():
         contacts = {"phone_numbers": [], "emails": []}
         category = "Unknown"
         summary = ""
+        confidence_score = None
 
         if homepage_content:
             metadata = parse_metadata(homepage_content)
@@ -157,6 +160,7 @@ def api_categorize():
                 bd = openai_dict.get("business_data", {})
                 category = bd.get("category", "Unknown")
                 summary = bd.get("summary", "")
+                confidence_score = bd.get("category_confidence_score", None)
             except json.JSONDecodeError:
                 return jsonify({"error": "OpenAI returned invalid JSON", "raw": openai_raw}), 500
 
@@ -169,7 +173,8 @@ def api_categorize():
             "website_title": metadata.get("title", ""),
             "website_description": metadata.get("description", ""),
             "category": category,
-            "summary": summary
+            "summary": summary,
+            "category_confidence_score": confidence_score
         }
 
         # Fields filtering
